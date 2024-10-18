@@ -40,4 +40,4 @@ This technique is used to optimize the Minimax algorithm by pruning branches in 
 ### Running the Game
 
 ```bash
-python large_board_tic_tac_toe.py
+
