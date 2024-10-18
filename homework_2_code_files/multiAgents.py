@@ -10,62 +10,88 @@ def minimax(game_state: GameStatus, depth: int, maximizingPlayer: bool, alpha=fl
 
     best_move = None  # Will store the best move found
 
+    # Check if it's the maximizing player's turn
     if maximizingPlayer:
-        # MAX (Human) player
-        max_value = float('-inf')
-        for move in game_state.get_possible_moves():  # Iterate through all possible moves
+        value = float('-inf')  # Start with the lowest possible value
+        pos_moves = game_state.get_moves()  # Get all possible moves for this state
+
+        # Iterate through all possible moves
+        for move in pos_moves:
             # Get the new game state after the move
-            new_state = game_state.get_new_state(move)
-            value, _ = minimax(new_state, depth - 1, False, alpha, beta)  # Call minimax for MIN player
-            
-            if value > max_value:
-                max_value = value
+            new_game_state = game_state.get_new_state(move)
+
+            # Recursively call minimax for the opponent's turn (minimizing player)
+            best_score = minimax(new_game_state, depth - 1, False, alpha, beta)[0]
+
+            # If this move is better than the current best, update value and best_move
+            if best_score > value:
+                value = best_score
                 best_move = move
-            
-            # Alpha-beta pruning
+
+            # Alpha-beta pruning: if value exceeds beta, stop searching
+            if value >= beta:
+                break
+            # Update alpha
             alpha = max(alpha, value)
-            if beta <= alpha:
-                break  # Beta cutoff
 
-        return max_value, best_move
-    
+    # Minimizing player's turn
     else:
-         #MIN (AI) player
-         min_value = float('inf')
-         for move in game_state.get_possible_moves():  # Iterate through all possible moves
-              #Get the new game state after the move
-              new_state = game_state.get_new_state(move)
-              value, _ = minimax(new_state, depth - 1, True, alpha, beta)  # Call minimax for MAX player
+        value = float('inf')  # Start with the highest possible value
+        pos_moves = game_state.get_moves()  # Get all possible moves for this state
 
-              if value < min_value:
-                  min_value = value
-                  best_move = move
+        # Iterate through all possible moves
+        for move in pos_moves:
+            # Get the new game state after the move
+            new_game_state = game_state.get_new_state(move)
 
-              # Alpha-beta pruning
-              beta = min(beta, value)
-              if beta <= alpha:
-                  break  # Alpha cutoff
-              
-         return min_value, best_move
-			
+            # Recursively call minimax for the opponent's turn (maximizing player)
+            min_score = minimax(new_game_state, depth - 1, True, alpha, beta)[0]
 
-	# return value, best_move
+            # If this move is better than the current best, update value and best_move
+            if min_score < value:
+                value = min_score
+                best_move = move
+
+            # Alpha-beta pruning: if value is less than or equal to alpha, stop searching
+            if value <= alpha:
+                break
+            # Update beta
+            beta = min(beta, value)
+
+    return value, best_move
+
 def negamax(game_status: GameStatus, depth: int, turn_multiplier: int, alpha=float('-inf'), beta=float('inf')):
-	terminal = game_status.is_terminal()
-	if (depth==0) or (terminal):
-		scores = game_status.get_negamax_scores(terminal)
-		return scores, None
+    # Check if game is in a terminal state or depth limit is reached
+    terminal = game_status.is_terminal()
+    if (depth == 0) or terminal:
+        # Get the score from the current game state
+        scores = game_status.get_negamax_scores(terminal)
+        return turn_multiplier * scores, None  # Multiply by turn_multiplier to flip perspective
 
-	"""
-    YOUR CODE HERE TO CALL NEGAMAX FUNCTION. REMEMBER THE RETURN OF THE NEGAMAX SHOULD BE THE OPPOSITE OF THE CALLING
-    PLAYER WHICH CAN BE DONE USING -NEGAMAX(). THE REST OF YOUR CODE SHOULD BE THE SAME AS MINIMAX FUNCTION.
-    YOU ALSO DO NOT NEED TO TRACK WHICH PLAYER HAS CALLED THE FUNCTION AND SHOULD NOT CHECK IF THE CURRENT MOVE
-    IS FOR MINIMAX PLAYER OR NEGAMAX PLAYER
-    RETURN THE FOLLOWING TWO ITEMS
-    1. VALUE
-    2. BEST_MOVE
-    
-    THE LINE TO RETURN THESE TWO IS COMMENTED BELOW WHICH YOU CAN USE
-    
-    """
-    #return value, best_move
+    best_move = None  # Initialize best_move to None
+    max_value = float('-inf')  # Start with negative infinity for maximization
+    pos_moves = game_status.get_moves()  # Get all possible moves
+
+    # Iterate through all possible moves
+    for move in pos_moves:
+        # Generate the new game state after applying the move
+        new_game_state = game_status.get_new_state(move)
+
+        # Recursively call negamax for the opponent's move (flip the player's turn with -turn_multiplier)
+        best_value = -negamax(new_game_state, depth - 1, -turn_multiplier, -beta, -alpha)[0]
+
+        # Update max_value and best_move if a better value is found
+        if best_value > max_value:
+            max_value = best_value
+            best_move = move
+
+        # Update alpha for alpha-beta pruning
+        alpha = max(alpha, best_value)
+
+        # If alpha is greater than or equal to beta, prune the remaining branches (beta cutoff)
+        if alpha >= beta:
+            break
+
+    # Return the best value and the best move found
+    return max_value, best_move
+

@@ -97,6 +97,47 @@ class GameStatus:
 		cols = len(self.board_state[0])
 		scores = 0
 		check_point = 3 if terminal else 2
+
+		#Customize the scores for Negamax
+		human_score = 100
+		ai_score = -100
+
+		#Check horizontal
+		for row in self.board_state:
+			for i in range(cols - check_point + 1): #Checks for triplets/pairs in each row
+				triplet = row[i:i+check_point]
+				if all(x == 1 for x in triplet):
+					scores += human_score #Human player
+				elif all(x == -1 for x in triplet):
+					scores += ai_score #AI player
+
+		#Check vertical
+		for col in range(cols):
+			for row in range(rows - check_point + 1): #Checks for triplets/pairs in each column
+				triplet = [self.board_state[row+i][col] for i in range(check_point)]
+				if all(x == 1 for x in triplet):
+					scores += human_score #Human player
+				elif all(x == -1 for x in triplet):
+					scores += ai_score #AI player
+
+		#Check diagonal
+		for row in range(rows - check_point + 1):
+			for col in range(cols - check_point + 1):
+				#From top left to bottom right
+				triplet = [self.board_state[row+i][col+i] for i in range(check_point)]
+				if all(x == 1 for x in triplet):
+					scores += human_score #Human player
+				elif all(x == -1 for x in triplet):
+					scores += ai_score #AI player
+
+				#From top right to bottom left
+				triplet = [self.board_state[row+i][col+check_point-i-1] for i in range(check_point)]
+				if all(x == 1 for x in triplet):
+					scores += human_score #Human player
+				elif all(x == -1 for x in triplet):
+					scores += ai_score #AI player
+
+		return scores
 	    
 
 	def get_moves(self):
