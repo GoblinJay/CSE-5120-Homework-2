@@ -14,10 +14,6 @@ class GameStatus:
 
 
 	def is_terminal(self):
-		"""
-        YOUR CODE HERE TO CHECK IF ANY CELL IS EMPTY WITH THE VALUE 0. IF THERE IS NO EMPTY
-        THEN YOU SHOULD ALSO RETURN THE WINNER OF THE GAME BY CHECKING THE SCORES FOR EACH PLAYER 
-        """
 		#Check if there are any empty cells (value 0)
 		for row in self.board_state:
 			for cell in row:
@@ -33,15 +29,7 @@ class GameStatus:
 			self.winner = "Draw"
 		return True #Returns true to signal the end of the game	
 
-	def get_scores(self, terminal):
-		"""
-        YOUR CODE HERE TO CALCULATE THE SCORES. MAKE SURE YOU ADD THE SCORE FOR EACH PLAYER BY CHECKING 
-        EACH TRIPLET IN THE BOARD IN EACH DIRECTION (HORIZONAL, VERTICAL, AND ANY DIAGONAL DIRECTION)
-        
-        YOU SHOULD THEN RETURN THE CALCULATED SCORE WHICH CAN BE POSITIVE (HUMAN PLAYER WINS),
-        NEGATIVE (AI PLAYER WINS), OR 0 (DRAW)
-        
-        """        
+	def get_scores(self, terminal):    
 		rows = len(self.board_state)
 		cols = len(self.board_state[0])
 		scores = 0
@@ -87,12 +75,6 @@ class GameStatus:
 	    
 
 	def get_negamax_scores(self, terminal):
-		"""
-        YOUR CODE HERE TO CALCULATE NEGAMAX SCORES. THIS FUNCTION SHOULD EXACTLY BE THE SAME OF GET_SCORES UNLESS
-        YOU SET THE SCORE FOR NEGAMX TO A VALUE THAT IS NOT AN INCREMENT OF 1 (E.G., YOU CAN DO SCORES = SCORES + 100 
-                                                                               FOR HUMAN PLAYER INSTEAD OF 
-                                                                               SCORES = SCORES + 1)
-        """
 		rows = len(self.board_state)
 		cols = len(self.board_state[0])
 		scores = 0
@@ -142,10 +124,10 @@ class GameStatus:
 
 	def get_moves(self):
 		moves = []
-		"""
-        YOUR CODE HERE TO ADD ALL THE NON EMPTY CELLS TO MOVES VARIABLES AND RETURN IT TO BE USE BY YOUR
-        MINIMAX OR NEGAMAX FUNCTIONS
-        """
+		for row in range(len(self.board_state)):
+			for col in range(len(self.board_state[0])):
+				if self.board_state[row][col] == 0: #If the cell is empty
+					moves.append((row, col)) #Append the move to the list of moves
 		return moves
 
 
