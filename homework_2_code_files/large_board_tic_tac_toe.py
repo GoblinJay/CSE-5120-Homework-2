@@ -56,12 +56,20 @@ class RandomBoardTicTacToe:
         self.screen = pygame.display.set_mode(self.size)
         pygame.display.set_caption("Tic Tac Toe Random Grid")
         self.screen.fill(self.BLACK)
-        # Draw the grid
-        
-        """
-        YOUR CODE HERE TO DRAW THE GRID OTHER CONTROLS AS PART OF THE GUI
-        """
-        
+        # Draw the grid lines along with current state of the game
+        for row in range(self.GRID_SIZE):
+            for column in range(self.GRID_SIZE):
+                color = self.WHITE
+                rect = pygame.Rect(column * (self.WIDTH + self.MARGIN), row * (self.WIDTH + self.MARGIN), self.WIDTH, self.HEIGHT)
+            #Draw the grid cell
+            pygame.draw.rect(self.screen, self.WHITE, rect)
+
+            #Check if the cell is empty or not
+            if self.board_state[row][column] == 1:
+                self.draw_cross(column, row)
+            elif self.board_state[row][column] == -1:
+                self.draw_circle(column, row)
+        #Updating the display
         pygame.display.update()
 
     def change_turn(self):
@@ -73,16 +81,25 @@ class RandomBoardTicTacToe:
 
 
     def draw_circle(self, x, y):
-        """
-        YOUR CODE HERE TO DRAW THE CIRCLE FOR THE NOUGHTS PLAYER
-        """
+        #Size of O
+        center = (x*(self.WIDTH + self.MARGIN) + self.WIDTH/2, y*(self.WIDTH + self.MARGIN) + self.HEIGHT/2)
+        radius = self.WIDTH/2 - self.MARGIN
+
+        #Draw O
+        pygame.draw.circle(self.screen, self.CIRCLE_COLOR, center, radius, 5)
         
 
     def draw_cross(self, x, y):
-        """
-        YOUR CODE HERE TO DRAW THE CROSS FOR THE CROSS PLAYER AT THE CELL THAT IS SELECTED VIA THE gui
-        """
+        #Size of X
+        first_start = (x*(self.WIDTH + self.MARGIN), y*(self.HEIGHT + self.MARGIN))
+        first_end = (first_start[0] + self.WIDTH, first_start[1] + self.HEIGHT)
+
+        second_start = (x*(self.WIDTH + self.MARGIN), y*(self.HEIGHT + self.MARGIN) + self.HEIGHT)
+        second_end = (second_start[0] + self.WIDTH, second_start[1] + self.HEIGHT)
         
+        #Draw X
+        pygame.draw.line(self.screen, self.CROSS_COLOR, first_start, first_end, 5)
+        pygame.draw.line(self.screen, self.CROSS_COLOR, second_start, second_end, 5)
 
     def is_game_over(self):
 
