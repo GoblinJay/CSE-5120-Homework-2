@@ -1,97 +1,61 @@
 from GameStatus_5120 import GameStatus
 
 
-def minimax(game_state: GameStatus, depth: int, maximizingPlayer: bool, alpha=float('-inf'), beta=float('inf')):
-    # Check if game is over or depth limit is reached
-    terminal = game_state.is_terminal()
-    if depth == 0 or terminal:
-        newScores = game_state.get_scores(terminal)
-        return newScores, None  # No move to make in terminal state
+def minimax(game_state, depth, maximizingPlayer, alpha=-float('inf'), beta=float('inf')):
+    if depth == 0 or game_state.is_terminal():
+        return game_state.get_scores(True), None  # Return the score and no move since we're at terminal/depth limit
 
-    best_move = None  # Will store the best move found
-
-    # Check if it's the maximizing player's turn
     if maximizingPlayer:
-        value = float('-inf')  # Start with the lowest possible value
-        pos_moves = game_state.get_moves()  # Get all possible moves for this state
-
-        # Iterate through all possible moves
-        for move in pos_moves:
-            # Get the new game state after the move
+        max_eval = -float('inf')
+        best_move = None
+        for move in game_state.get_moves():
             new_game_state = game_state.get_new_state(move)
-
-            # Recursively call minimax for the opponent's turn (minimizing player)
-            best_score = minimax(new_game_state, depth - 1, False, alpha, beta)[0]
-
-            # If this move is better than the current best, update value and best_move
-            if best_score > value:
-                value = best_score
+            eval, _ = minimax(new_game_state, depth - 1, False, alpha, beta)
+            if eval > max_eval:  # Compare only the evaluation score, not the tuple
+                max_eval = eval
                 best_move = move
-
-            # Alpha-beta pruning: if value exceeds beta, stop searching
-            if value >= beta:
+            alpha = max(alpha, eval)
+            if beta <= alpha:
                 break
-            # Update alpha
-            alpha = max(alpha, value)
-
-    # Minimizing player's turn
+        return max_eval, best_move
     else:
-        value = float('inf')  # Start with the highest possible value
-        pos_moves = game_state.get_moves()  # Get all possible moves for this state
-
-        # Iterate through all possible moves
-        for move in pos_moves:
-            # Get the new game state after the move
+        min_eval = float('inf')
+        best_move = None
+        for move in game_state.get_moves():
             new_game_state = game_state.get_new_state(move)
-
-            # Recursively call minimax for the opponent's turn (maximizing player)
-            min_score = minimax(new_game_state, depth - 1, True, alpha, beta)[0]
-
-            # If this move is better than the current best, update value and best_move
-            if min_score < value:
-                value = min_score
+            eval, _ = minimax(new_game_state, depth - 1, True, alpha, beta)
+            if eval < min_eval:  # Compare only the evaluation score, not the tuple
+                min_eval = eval
                 best_move = move
-
-            # Alpha-beta pruning: if value is less than or equal to alpha, stop searching
-            if value <= alpha:
+            beta = min(beta, eval)
+            if beta <= alpha:
                 break
-            # Update beta
-            beta = min(beta, value)
+        return min_eval, best_move
 
-    return value, best_move
 
-def negamax(game_status: GameStatus, depth: int, turn_multiplier: int, alpha=float('-inf'), beta=float('inf')):
-    # Check if game is in a terminal state or depth limit is reached
-    terminal = game_status.is_terminal()
-    if (depth == 0) or terminal:
-        # Get the score from the current game state
-        scores = game_status.get_negamax_scores(terminal)
-        return turn_multiplier * scores, None  # Multiply by turn_multiplier to flip perspective
+def negamax(game_state, depth, turn_multiplier, alpha=-float('inf'), beta=float('inf')):
+    # Negamax algorithm with alpha-beta pruning.
+    if depth == 0 or game_state.is_terminal():
+        # Use `get_negamax_scores()` to get the score for negamax.
+        score = game_state.get_negamax_scores(game_state.is_terminal())
+        return turn_multiplier * score, None  # Return negated score for negamax.
 
-    best_move = None  # Initialize best_move to None
-    max_value = float('-inf')  # Start with negative infinity for maximization
-    pos_moves = game_status.get_moves()  # Get all possible moves
+    best_move = None
+    max_eval = -float('inf')
 
-    # Iterate through all possible moves
-    for move in pos_moves:
-        # Generate the new game state after applying the move
-        new_game_state = game_status.get_new_state(move)
+    for move in game_state.get_moves():
+        new_game_state = game_state.get_new_state(move)
+        eval, _ = negamax(new_game_state, depth - 1, -turn_multiplier, -beta, -alpha)
 
-        # Recursively call negamax for the opponent's move (flip the player's turn with -turn_multiplier)
-        best_value = -negamax(new_game_state, depth - 1, -turn_multiplier, -beta, -alpha)[0]
-
-        # Update max_value and best_move if a better value is found
-        if best_value > max_value:
-            max_value = best_value
+        eval = -eval  # Negate the evaluation for the negamax algorithm.
+        if eval > max_eval:
+            max_eval = eval
             best_move = move
 
-        # Update alpha for alpha-beta pruning
-        alpha = max(alpha, best_value)
-
-        # If alpha is greater than or equal to beta, prune the remaining branches (beta cutoff)
+        alpha = max(alpha, eval)
         if alpha >= beta:
-            break
+            break  # Alpha-beta pruning.
 
-    # Return the best value and the best move found
-    return max_value, best_move
+    return max_eval, best_move
+
 
